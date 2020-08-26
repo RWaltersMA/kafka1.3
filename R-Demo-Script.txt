@@ -1,0 +1,32 @@
+
+
+Showing moving average Demo
+
+PREP:
+mongo "mongodb+srv://mongodbsink-szptp.mongodb.net/test"  --username <<USERNAME>>
+Use Stocks
+db.StockData.remove({})
+
+
+install.packages("ggplot2")
+install.package(“mongolite”)
+libary(ggplot2)
+library(mongolite)
+
+ts=mongo(collection="StockData", db="Stocks", url="<<ATLAS CONNECTION STRING GOES HERE>>")
+
+tss <- ts$find(fields='{"company_symbol":true,"company_name":true,"price":true,"tx_time":true}')
+
+tsdf<-data.frame(tss$tx_time,tss$price, tss$company_symbol)
+
+Tsdf. (Look at the symbols and data)
+
+— Plot of symbols and the price ranges
+
+ggplot(data=tsdf,mapping=aes(x=tss.company_symbol, y=tss.price, color=tss.company_symbol)) + geom_boxplot()
+
+
+— Calculate the moving average
+
+ggplot(data=subset(tsdf,tss.company_symbol == "<<YOUR_SYMBOL_HERE>>"),mapping=aes(as.POSIXct.default(tss.tx_time,format = "%Y-%m-%dT%H:%M:%SZ", tz = "UTC"), y=tss.price, color=tss.company_symbol)) + geom_point() + geom_smooth(method='loess', color = "#09557f",size = 0.6) + ggtitle("Moving average") + xlab("Time") + ylab("Price")
+

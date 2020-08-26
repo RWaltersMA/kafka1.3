@@ -1,0 +1,36 @@
+version: '3.6'
+services:
+  mysql:
+   image: "mysqlimg:0.1"
+   hostname: mysqlstock
+   container_name: mysqlstock
+   ports:
+     - "3306:3306"
+   networks:
+     - localnet
+
+  stockgenmyusql:
+   image: "stockgenmysql:0.1"
+   hostname: stockgenmysql
+   container_name: stockgenmysql
+   networks:
+     - localnet
+   depends_on:
+     - mysql
+   environment:
+     WAIT_HOSTS: mysqlstock:3306
+
+  stockportal:
+   image: "stockportal:0.1"
+   hostname: stockportal
+   container_name: stockportal
+   networks:
+     - localnet
+   depends_on:
+     - mysql
+   ports:
+     - 8088:80
+
+networks:
+  localnet:
+    attachable: true

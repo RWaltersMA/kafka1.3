@@ -1,0 +1,1 @@
+This spins up the mysql server and the python app that generates the data into mysql within the same network
