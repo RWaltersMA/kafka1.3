@@ -190,7 +190,12 @@ Stocks security data is being written to both a local MySQL and MongoDB database
 
 To see the list of stocks and their corresponding database navigate to
 http://localhost:8080 with your web browser
-
+'''
+if [ "$2" == "skip" ]
+then
+    echo '\nConnector configuration was skipped.\n\n'
+else
+echo '''
 The MongoDB Connector is configured as follows:
 SOURCE: from local MongoDB cluster to stockdata.stocks.stockdata topic stored as (key, value)=(String, Avro)
 SINK: from stock.Stocks.StockData topic (key, value)=(String,Avro) to Atlas
@@ -198,6 +203,9 @@ SINK: from mysqlstock.Stocks.StockData topic (key, value)=(Avro, Avro) to Atlas
 
 The Debenzium MySQL Connector is configured as follows:
 SOURCE: from local MySQL cluster to mysqlstock.Stocks.StockData
+'''
+fi
+echo '''
 
 To see a list of the kafka topics navigate to
 http://localhost:8000 
