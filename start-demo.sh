@@ -7,6 +7,11 @@ if lsof -Pi :27017 -sTCP:LISTEN -t >/dev/null ; then
     exit 1
 fi
 )
+#Check to see if we passed the Atlas connection string
+if [[ $# -eq 0 ]] ; then
+    echo 'Useage:\n\nstart-demo.h "ATLAS CONNECTION STRING" [skip]\n\nParameters:\n"ATLAS CONNECTION STRING" - in the format of "mongodb+srv://USERNAME:PASSWORD@xxxxx.yyyyy.mongodb.net/test"  (don''t forget the quotes!)\nskip - (optional) will install connectors but skip the actual source and sink configuration\n\n'
+    exit 1
+fi
 
 echo "Starting docker ."
 docker-compose up -d --build
@@ -21,15 +26,12 @@ function clean_up {
     curl --output /dev/null -X DELETE http://localhost:8083/connectors/mysql-connector || true
     echo "Removed MySQL Source"
     
-    docker-compose exec mongo1 /usr/bin/mongo --eval "db.dropDatabase()"
-    echo "Dropped database on Mongo1"
+    docker-compose exec mongo1 /usr/bin/mongo localhost:27017/Stocks --eval "db.dropDatabase()"
+    echo "Dropped Stocks database on the local MongoDB cluster"
     docker-compose down
-    if [ -z "$1" ]
-    then
-      echo "NOTE: Data from the demo was left on the MongoDB Atlas cluster.\nIf you would like a clean demo make sure to remove data in the Stocks.StockData collection.\n\nBye!\n"
-    else
-      echo -e $1 Hello!!
-    fi
+
+    echo "NOTE: Data from the demo was left on the MongoDB Atlas cluster.\nIf you would like a clean demo make sure to remove data in the Stocks.StockData collection.\n\nBye!\n"
+
 }
 
 sleep 5
@@ -77,13 +79,10 @@ rs.conf();'''
 echo "\nCleaning up local MongoDB databases (dropping Stocks database):"
 docker-compose exec mongo1 /usr/bin/mongo --eval '''db.runCommand( { dropDatabase: 1 } );''' Stocks
 
-echo "\nKafka Topics:"
-curl -X GET "http://localhost:8082/topics" -w "\n"
-
-echo "\nKafka Connectors:"
-curl -X GET "http://localhost:8083/connectors/" -w "\n"
-
-sleep 2
+if [ "$2" == "skip" ]
+then
+    echo '\nSkipping connector configuration!'
+else
 echo "\nAdding MongoDB Kafka Source Connector from local MongoDB to 'stockdata.stocks.stockdata' topic stored as (key, value)=(String, Avro):"
 
 curl -X POST -H "Content-Type: application/json" --data '
@@ -173,10 +172,16 @@ curl -X POST -H "Content-Type: application/json" --data '
     "value.converter.schema.registry.url": "http://schema-registry:8081"
   }
 }}' http://localhost:8083/connectors -w "\n"
+fi
 
-sleep 2
-echo "\nKafka Connectors: \n"
-curl -X GET "http://localhost:8083/connectors/" -w "\n"
+sleep 5
+echo "\n\nKafka Connectors status:\n\n"
+curl -s "http://localhost:8083/connectors?expand=info&expand=status" | \
+           jq '. | to_entries[] | [ .value.info.type, .key, .value.status.connector.state,.value.status.tasks[].state,.value.info.config."connector.class"]|join(":|:")' | \
+           column -s : -t| sed 's/\"//g'| sort
+
+echo "\n\nVersion of MongoDB Connector for Apache Kafka installed:\n"
+curl --silent http://localhost:8083/connector-plugins | jq -c '.[] | select( .class == "com.mongodb.kafka.connect.MongoSourceConnector" or .class == "com.mongodb.kafka.connect.MongoSinkConnector" )'
 
 echo '''
 

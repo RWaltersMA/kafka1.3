@@ -1,0 +1,141 @@
+#define your atlas conection string (optional)
+export ATLAS_CONNECTION="mongodb+srv://kafkauser:kafkapassword123@democluster.lkyil.mongodb.net/test?retryWrites=true&w=majority"
+
+#Start the containers, skip the configuration so we can step through it and explain the parameters
+sh start-demo.sh ATLAS_CONNECTION skip
+
+#Define the MySQL connectors SOURCE and SINK
+
+#MYSQL SOURCE TO LOCAL MONGODB
+#Using Avro for key and value and Schema registry
+
+curl -X POST -H "Content-Type: application/json" --data '
+{
+  "name": "mysql-connector",
+  "config": {
+    "connector.class": "io.debezium.connector.mysql.MySqlConnector",
+    "tasks.max": "1",
+    "database.hostname": "mysqlstock",
+    "database.port": "3306",
+    "database.user": "mysqluser",
+    "database.password": "pass@word1",
+    "database.server.id": "223344",
+    "database.server.name": "mysqlstock",
+    "database.whitelist": "Stocks",
+    "database.history.kafka.bootstrap.servers": "broker:29092",
+    "database.history.kafka.topic": "dbhistory.StockData",
+    "key.converter": "io.confluent.connect.avro.AvroConverter",
+    "value.converter": "io.confluent.connect.avro.AvroConverter",
+    "key.converter.schema.registry.url": "http://schema-registry:8081",
+    "value.converter.schema.registry.url": "http://schema-registry:8081"
+  }
+}}' http://localhost:8083/connectors -w "\n"
+
+#MYSQL SINK TO ATLAS
+#Key and Value is in Avro, MongoDB sink can handle JSON Schema, Avro and Protobuf, note we are adding a field "Exchange" that describes where data is from
+
+curl -X POST -H "Content-Type: application/json" --data '
+  {"name": "mysql-atlas-sink",
+   "config": {
+     "connector.class":"com.mongodb.kafka.connect.MongoSinkConnector",
+     "tasks.max":"1",
+     "topics":"mysqlstock.Stocks.StockData",
+     "connection.uri":"'"$ATLAS_CONNECTION"'",
+     "database":"Stocks",
+     "collection":"StockData",
+     "transforms": "ExtractField,InsertField",
+     "transforms.ExtractField.type":"org.apache.kafka.connect.transforms.ExtractField$Value",
+     "transforms.ExtractField.field":"after",
+     "transforms.InsertField.type": "org.apache.kafka.connect.transforms.InsertField$Value",
+     "transforms.InsertField.static.field": "Exchange",
+     "transforms.InsertField.static.value": "MySQL",
+     "key.converter":"io.confluent.connect.avro.AvroConverter",
+     "key.converter.schema.registry.url":"http://schema-registry:8081",
+     "value.converter":"io.confluent.connect.avro.AvroConverter",
+     "value.converter.schema.registry.url":"http://schema-registry:8081"
+}}' http://localhost:8083/connectors -w "\n"
+
+#create source connector from local MongoDB to Kafka topic
+# new parameters: output.json.formatter, output.format.key/value, output.schema.value
+# This demo defines this schema in Avro to use (note we define schema in avro you are not required to use Avro as the converter!)
+
+curl -X POST -H "Content-Type: application/json" --data '
+  {"name": "mongo-source-stockdata",
+   "config": {
+     "tasks.max":"1",
+     "connector.class":"com.mongodb.kafka.connect.MongoSourceConnector",
+     "output.json.formatter":"com.mongodb.kafka.connect.source.json.formatter.SimplifiedJson",
+     "output.format.value":"schema",
+     "output.schema.value":"{\"name\":\"MongoExchangeSchema\",\"type\":\"record\",\"namespace\":\"com.mongoexchange.avro\",\"fields\":[ {\"name\": \"_id\",\"type\": \"string\"},{\"name\": \"company_symbol\",\"type\": \"string\"},{\"name\": \"company_name\",\"type\": \"string\"},{ \"name\": \"price\",\"type\": \"float\"},{\"name\": \"tx_time\",\"type\": \"string\"}]}",
+     "output.format.key":"json",
+     "key.converter":"org.apache.kafka.connect.storage.StringConverter",
+     "value.converter":"io.confluent.connect.avro.AvroConverter",
+     "value.converter.schema.registry.url":"http://schema-registry:8081",
+     "transforms": "InsertField",
+     "transforms.InsertField.type": "org.apache.kafka.connect.transforms.InsertField$Value",
+     "transforms.InsertField.static.field": "Exchange",
+     "transforms.InsertField.static.value": "MongoDB",
+     "publish.full.document.only": true,
+     "connection.uri":"mongodb://mongo1:27017,mongo2:27017,mongo3:27017",
+     "topic.prefix":"stockdata",
+     "database":"Stocks",
+     "collection":"StockData"
+}}' http://localhost:8083/connectors -w "\n"
+
+# Kafka topic to atlas, our MongoDB data was stored with (Key, Value) as (String, Avro)
+curl -X POST -H "Content-Type: application/json" --data '
+  {"name": "mongo-atlas-sink",
+   "config": {
+     "connector.class":"com.mongodb.kafka.connect.MongoSinkConnector",
+     "tasks.max":"1",
+     "topics":"stockdata.Stocks.StockData",
+     "connection.uri":"'"$ATLAS_CONNECTION"'",
+     "database":"Stocks",
+     "collection":"StockData",
+     "key.converter":"org.apache.kafka.connect.storage.StringConverter",
+     "value.converter":"io.confluent.connect.avro.AvroConverter",
+     "value.converter.schema.registry.url":"http://schema-registry:8081"
+}}' http://localhost:8083/connectors -w "\n"
+
+#Now that we have defined the connetors, let's check out the status, notice all 4 configurations are RUNNING, schema registry has schema defined
+sh status.h
+
+#Take a look at the messages in the Kafka Topics
+http://localhost:8000
+
+#Connect to your Atlas cluster and enumerate the Stocks.StockData collection
+# notice the exchange field says either MongoDB or MySQL 
+
+
+
+
+############## TROUBLESHOOTING
+
+# Check docker logs for kafka-connect service, any errors with the MongoDB connector will show up here
+
+docker ps 
+
+(get the container ID)
+
+docker logs (container id of kafka connect)
+
+
+# Run the STATUS.H script file to dump list of connectors.  The script shows other info like connector version and schema info, however if you just want to see connector info here are some useful commands
+
+# List current connectors and status
+# Thanks to Robin Moffatt @ Confluent https://www.confluent.io/blog/kafka-connect-improvements-in-apache-kafka-2-3/
+
+curl -s "http://localhost:8083/connectors?expand=info&expand=status" | \
+           jq '. | to_entries[] | [ .value.info.type, .key, .value.status.connector.state,.value.status.tasks[].state,.value.info.config."connector.class"]|join(":|:")' | \
+           column -s : -t| sed 's/\"//g'| sort
+
+# Restart any connector tasks that are FAILED
+# Works for Apache Kafka >= 2.3.0 
+# Thanks to @jocelyndrean for this enhanced code snippet that also supports 
+#  multiple tasks in a connector
+curl -s "http://localhost:8083/connectors?expand=status" | \
+  jq -c -M 'map({name: .status.name } +  {tasks: .status.tasks}) | .[] | {task: ((.tasks[]) + {name: .name})}  | select(.task.state=="FAILED") | {name: .task.name, task_id: .task.id|tostring} | ("/connectors/"+ .name + "/tasks/" + .task_id + "/restart")' | \
+  xargs -I{connector_and_task} curl -v -X POST "http://localhost:8083"\{connector_and_task\}
+
+
+

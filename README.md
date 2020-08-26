@@ -2,16 +2,17 @@
 
 This demo generates fake stock data and populates two databases - MySQL and MongoDB.  Data flows from these databases to Kafka topics via their respetive connectors - Debezium MySQL and MongoDB Connector for Apache Kafka.  Data from both topics are then sinked to a MongoDB cluster in MongoDB Atlas using the MongoDB Connector for Apache Kafka as a sink.  
 
-This demo environment is configured to showcase the key 1.3 features including:
+This demo highlights MongoDB Connection for Apache Kafka version 1.3 features including:
 - Schema support in source connector
 
-This README will cover how to get the environment up and running, for a tour of the features using this demo environment check out the TODO: BLOG POST.
+This README will cover how to get the environment up and running, for a tour of the features using this demo environment read the <B>TODO: BLOG POST</B> and `demo-script.txt` file.
 
 Note: Until version 1.3 is formally released this repo will contain the snapshot build of 1.3 of the connector.  It is not a production ready build.
 
 ## Requirements
   - Docker 18.09+
   - Docker compose 1.24+
+  - [jq](https://stedolan.github.io/jq/)
 
 ## Running the demo
 ### 1. Download/Clone the docker files from the GitHub repository
@@ -81,7 +82,7 @@ You can view the messages in these Kafka topics using the [Kafkacat](https://git
 
 ### 3. View the combined data in MongoDB Atlas
 
-The MongoDB Connector for Apache Kafka is configured as a sink connector and writes data to MongoDB Atlas.  Data is written to the StockData collection in the Stocks database.  Click on "Collections" tab in your MongoDB Atlas portal to view the StockData collection. These data are from both the MySQL and MongoDB databases.
+The MongoDB Connector for Apache Kafka is configured as a sink connector and writes data to MongoDB Atlas.  Data is written to the StockData collection in the Stocks database.  Click on "Collections" tab in your MongoDB Atlas portal to view the StockData collection. These data are from both the MySQL and MongoDB databases.  There is an added field called Exchange that describes the database origin of the data.
 
 ## Something hit the fan and I dont know what to do - Troubleshooting
 
