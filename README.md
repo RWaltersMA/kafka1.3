@@ -27,9 +27,9 @@ Run the following script from the command shell:
 
 Note: Make sure you are in the same directory as the build-images script file.  Also, you may have to add execute permission via a `chmod +x build-images.sh` to execute the script.
 
-This shell script will build the following containers:
+This shell script will build the following images:
 
-Container Name | Description
+Image Name | Description
 --------------- | -----------------
 <B>mysqlimg</B> | Imagine of MySQL pre-configured with authentication
 <B>stockgenmongo</B> | Runs Python app to create data and insert into local MongoDB cluster
