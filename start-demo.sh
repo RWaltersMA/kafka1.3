@@ -106,7 +106,7 @@ curl -X POST -H "Content-Type: application/json" --data '
      "topic.prefix":"stockdata",
      "database":"Stocks",
      "collection":"StockData"
-}}' http://localhost:8083/connectors -w "\n"
+}}' http://localhost:8083/connectors -w "\n" | jq .
 
 
 sleep 2
@@ -125,7 +125,7 @@ curl -X POST -H "Content-Type: application/json" --data '
      "key.converter":"org.apache.kafka.connect.storage.StringConverter",
      "value.converter":"io.confluent.connect.avro.AvroConverter",
      "value.converter.schema.registry.url":"http://schema-registry:8081"
-}}' http://localhost:8083/connectors -w "\n"
+}}' http://localhost:8083/connectors -w "\n" | jq .
 
 echo "\nAdding MongoDB Kafka Sink Connector for the MySQL topic mysqlstock.Stocks.StockData (key, value)=(Avro,Avro) into the 'stocks.stockdata' collection in Atlas"
 curl -X POST -H "Content-Type: application/json" --data '
@@ -147,7 +147,7 @@ curl -X POST -H "Content-Type: application/json" --data '
      "key.converter.schema.registry.url":"http://schema-registry:8081",
      "value.converter":"io.confluent.connect.avro.AvroConverter",
      "value.converter.schema.registry.url":"http://schema-registry:8081"
-}}' http://localhost:8083/connectors -w "\n"
+}}' http://localhost:8083/connectors -w "\n" | jq .
 
 sleep 3
 echo "\nAdding Debezium MySQL Source Connector for the 'Stocks.StockData' table:"
@@ -171,7 +171,7 @@ curl -X POST -H "Content-Type: application/json" --data '
     "key.converter.schema.registry.url": "http://schema-registry:8081",
     "value.converter.schema.registry.url": "http://schema-registry:8081"
   }
-}}' http://localhost:8083/connectors -w "\n"
+}}' http://localhost:8083/connectors -w "\n" | jq .
 fi
 
 sleep 5

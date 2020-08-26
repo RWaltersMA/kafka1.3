@@ -2,7 +2,7 @@
 export ATLAS_CONNECTION="mongodb+srv://kafkauser:kafkapassword123@democluster.lkyil.mongodb.net/test?retryWrites=true&w=majority"
 
 #Start the containers, skip the configuration so we can step through it and explain the parameters
-sh start-demo.sh ATLAS_CONNECTION skip
+sh start-demo.sh $ATLAS_CONNECTION skip
 
 #Define the MySQL connectors SOURCE and SINK
 
