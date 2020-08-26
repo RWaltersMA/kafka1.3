@@ -96,4 +96,4 @@ The MongoDB Connector for Apache Kafka is configured as a sink connector and wri
 
 There is a script file called, status.h running this will show you the version of the MongoDB connector installed in Kafka Connect, the status of the connectors, and other useful information.
 
-
+![Status](readme-images/status.png)
