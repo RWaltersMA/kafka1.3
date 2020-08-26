@@ -84,6 +84,8 @@ You can view the messages in these Kafka topics using the [Kafkacat](https://git
 
 The MongoDB Connector for Apache Kafka is configured as a sink connector and writes data to MongoDB Atlas.  Data is written to the StockData collection in the Stocks database.  Click on "Collections" tab in your MongoDB Atlas portal to view the StockData collection. These data are from both the MySQL and MongoDB databases.  There is an added field called Exchange that describes the database origin of the data.
 
+![Atlas](readme-images/atlas.png)
+
 ## Something hit the fan and I dont know what to do - Troubleshooting
 
 ### Check the logs of the docker containers
@@ -94,6 +96,6 @@ The MongoDB Connector for Apache Kafka is configured as a sink connector and wri
 
 ### Use the status.h script file to dump useful info
 
-There is a script file called, status.h running this will show you the version of the MongoDB connector installed in Kafka Connect, the status of the connectors, and other useful information.
+There is a script file called, `status.h` running this will show you the version of the MongoDB connector installed in Kafka Connect, the status of the connectors, and other useful information.
 
 ![Status](readme-images/status.png)
