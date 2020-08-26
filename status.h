@@ -7,7 +7,7 @@ curl -s "http://localhost:8083/connectors?expand=info&expand=status" | \
 echo "\n\nVersion of MongoDB Connector for Apache Kafka installed:\n"
 curl --silent http://localhost:8083/connector-plugins | jq -c '.[] | select( .class == "com.mongodb.kafka.connect.MongoSourceConnector" or .class == "com.mongodb.kafka.connect.MongoSinkConnector" )'
 
-echo "\nWSchemas in Schema Registry:\n\n"
+echo "\nSchemas in Schema Registry:\n\n"
 curl --silent -X GET http://localhost:8081/subjects | jq
 
 echo "\n\nAvro Schema from MongoDB : stockdata.Stocks.StockData-value"
