@@ -1,5 +1,12 @@
+#start the demo environment
 
-#If you do not have the kafka installed, download from https://www.apache.org/dyn/closer.cgi?path=/kafka
+#define your atlas conection string (optional)
+export ATLAS_CONNECTION="mongodb+srv://kafkauser:kafkapassword123@democluster.lkyil.mongodb.net/test?retryWrites=true&w=majority"
+
+#Start the containers, skip the configuration so we can step through it and explain the parameters
+sh start-demo.sh $ATLAS_CONNECTION skip
+
+#If you do not have the kafka installed locally, download from https://www.apache.org/dyn/closer.cgi?path=/kafka
 #there will be a bin folder that includes various kafka- utilities
 #create a topic with 3 partitions
 ~/kafka/bin/kafka-topics.sh --create --bootstrap-server localhost:9092 --replication-factor 1 --partitions 3 --topic demo1-3.Demo.pets

@@ -1,3 +1,5 @@
+#start the demo environment
+
 #define your atlas conection string (optional)
 export ATLAS_CONNECTION="mongodb+srv://kafkauser:kafkapassword123@democluster.lkyil.mongodb.net/test?retryWrites=true&w=majority"
 
