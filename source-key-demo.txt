@@ -1,7 +1,7 @@
 #start the demo environment
 
 #define your atlas conection string (optional)
-export ATLAS_CONNECTION="mongodb+srv://kafkauser:kafkapassword123@democluster.lkyil.mongodb.net/test?retryWrites=true&w=majority"
+export ATLAS_CONNECTION="mongodb+srv://YOUR CONNECTION STRING HERE"
 
 #Start the containers, skip the configuration so we can step through it and explain the parameters
 sh start-demo.sh $ATLAS_CONNECTION skip
