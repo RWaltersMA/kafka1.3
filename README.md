@@ -13,6 +13,7 @@ Note: Until version 1.3 is formally released this repo will contain the snapshot
   - Docker 18.09+
   - Docker compose 1.24+
   - [jq](https://stedolan.github.io/jq/)
+  - [kafkacat](https://github.com/edenhill/kafkacat)
 
 ## Running the demo
 ### 1. Download/Clone the docker files from the GitHub repository

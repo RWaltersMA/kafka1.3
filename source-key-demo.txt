@@ -1,0 +1,41 @@
+
+#If you do not have the kafka installed, download from https://www.apache.org/dyn/closer.cgi?path=/kafka
+#there will be a bin folder that includes various kafka- utilities
+#create a topic with 3 partitions
+~/kafka/bin/kafka-topics.sh --create --bootstrap-server localhost:9092 --replication-factor 1 --partitions 3 --topic demo1-3.Demo.pets
+
+#configure source connector to read from Demo.pets
+curl -X POST -H "Content-Type: application/json" --data '
+  {"name": "mongo-source-key",
+   "config": {
+     "tasks.max":"1",
+     "connector.class":"com.mongodb.kafka.connect.MongoSourceConnector",
+     "output.json.formatter":"com.mongodb.kafka.connect.source.json.formatter.SimplifiedJson",
+     "output.format.key":"schema",
+     "output.schema.key":"{\"name\":\"AnimalType\",\"type\":\"record\",\"namespace\":\"com.mongoexchange.avro\",\"fields\":[{\"name\": \"fullDocument\",\"type\":{\"name\": \"fullDocument\",\"type\": \"record\",\"fields\":[{\"name\":\"animal_type\",\"type\": \"string\"}]}}]}",
+     "output.format.value":"json",
+     "value.converter":"org.apache.kafka.connect.storage.StringConverter",
+     "key.converter":"io.confluent.connect.avro.AvroConverter",
+     "key.converter.schema.registry.url":"http://schema-registry:8081",
+     "publish.full.document.only": true,
+     "connection.uri":"mongodb://mongo1:27017,mongo2:27017,mongo3:27017",
+     "topic.prefix":"demo1-3",
+     "database":"Demo",
+     "collection":"pets"
+}}' http://localhost:8083/connectors -w "\n"
+
+#open a shell, wait for data
+kafkacat -b localhost:9092 -t demo1-3.Demo.pets -C  -f '\nKey :\t %k\t\nValue :\t %s\nPartition: %p\tOffset: %o\n--\n'
+
+#open a shell and insert data into mongo
+db.pets.insert({"animal_type" : "dog", "name" : "susan" })
+db.pets.insert({"animal_type" : "dog", "name" : "roscoe" })
+db.pets.insert({"animal_type" : "dog", "name" : "zues" })
+db.pets.insert({"animal_type" : "dog", "name" : "lady" })
+db.pets.insert({"animal_type" : "iguana", "name" : "roger" })
+db.pets.insert({"animal_type" : "iguana", "name" : "george" })
+db.pets.insert({"animal_type" : "elephant", "name" : "JJ" })
+db.pets.insert({"animal_type" : "elephant", "name" : "Betty" })
+
+#now add another dog and notice it is grouped in the same partition as the other dogs
+db.pets.insert({"animal_type" : "dog", "name" : "Harriet" })
