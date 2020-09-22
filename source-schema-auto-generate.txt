@@ -1,0 +1,19 @@
+
+curl -X POST -H "Content-Type: application/json" --data '
+  {"name": "mongo-source-auto",
+   "config": {
+     "tasks.max":"1",
+     "connector.class":"com.mongodb.kafka.connect.MongoSourceConnector",
+     "output.json.formatter":"com.mongodb.kafka.connect.source.json.formatter.SimplifiedJson",
+     "output.format.value":"schema",
+     "output.schema.infer.value":true,
+     "output.format.key":"json",
+     "key.converter":"org.apache.kafka.connect.storage.StringConverter",
+     "value.converter":"io.confluent.connect.avro.AvroConverter",
+     "value.converter.schema.registry.url":"http://schema-registry:8081",
+     "publish.full.document.only": true,
+     "connection.uri":"mongodb://mongo1:27017,mongo2:27017,mongo3:27017",
+     "topic.prefix":"schematest",
+     "database":"Stocks",
+     "collection":"customers"
+}}' http://localhost:8083/connectors -w "\n"
