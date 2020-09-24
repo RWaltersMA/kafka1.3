@@ -1,4 +1,4 @@
-# MongoDB Connector for Apache Kafka V1.3 example - Stock Exchange example
+# MongoDB Connector for Apache Kafka V1.3 example - Financial Securities 
 
 This demo generates fake stock data and populates two databases - MySQL and MongoDB.  Data flows from these databases to Kafka topics via their respetive connectors - Debezium MySQL and MongoDB Connector for Apache Kafka.  Data from both topics are then sinked to a MongoDB cluster in MongoDB Atlas using the MongoDB Connector for Apache Kafka as a sink.  
 

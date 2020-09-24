@@ -1,7 +1,7 @@
 FROM confluentinc/cp-kafka-connect:latest
 
 #If you want to run a private build uncomment the COPY command and make sure the JAR file is in the directory path
-COPY mongo-kafka-connect-1.3.0-20200922.104405-32-all.jar /usr/share/confluent-hub-components
+COPY mongo-kafka-connect-1.3.0-20200924.125549-33-all.jar /usr/share/confluent-hub-components
 
 # If you want to run the latest production release of the connector, uncomment the following:
 # RUN confluent-hub install --no-prompt mongodb/kafka-connect-mongodb:latest
