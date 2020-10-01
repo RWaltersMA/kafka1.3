@@ -5,9 +5,7 @@ This demo generates fake stock data and populates two databases - MySQL and Mong
 This demo highlights MongoDB Connection for Apache Kafka version 1.3 features including:
 - Schema support in source connector
 
-This README will cover how to get the environment up and running, for a tour of the features using this demo environment read the <B>TODO: BLOG POST</B> and `demo-script.txt` file.
-
-Note: Until version 1.3 is formally released this repo will contain the snapshot build of 1.3 of the connector.  It is not a production ready build.
+This README will cover how to get the environment up and running, for a tour of the features using this demo environment read the <B>[MongoDB Connector for Apache Kafka 1.3](https://www.mongodb.com/blog/post/mongo-db-connector-for-apache-kafka-1-3-available-now)</B> blog post.
 
 ## Requirements
   - Docker 18.09+
